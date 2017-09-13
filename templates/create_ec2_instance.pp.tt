@@ -1,0 +1,45 @@
+# Puppet file used to create EC2 instances
+
+$user_data = @("USER_DATA"/)
+    #!/bin/bash
+    set -a
+
+    hostname [% name %].[% domain %]
+    domainname [% domain %]
+    echo [% name %].[% domain %]> /etc/hostname
+    echo "preserve_hostname: true" >> /etc/cloud/cloud.cfg
+
+    curl https://bitbucket.org 2> /dev/null > /dev/null
+    if [[ $? -eq 0 ]]; then
+        curl https://bitbucket.org/target-ondemand/tonline-puppet-utils/raw/master/agent_install.sh > /tmp/install.sh
+    else
+        curl http://tlubitbckt01vth:7990/projects/PUP/repos/utils/browse/agent_install.sh?raw > /tmp/install.sh
+    fi
+
+    if [[ -r /tmp/install.sh ]]; then
+      chmod 755 /tmp/install.sh
+      PCG_PP_MASTER="[% puppet_master %]"
+      PCG_USER="[% user %]"
+      PCG_PROVISIONER="[% provisioner %]"
+      /tmp/install.sh '[% app_name %]' '[% network_zone %]' '[% network_type %]' '[% location %]' '[% app_sub_env %]' '[% puppet_role %]' '[% puppet_env %]' [% app_sub_env_inst %]
+      /usr/local/bin/puppet agent -t
+    else
+        echo "There was an error downloading the Puppet install script"
+        exit 1
+    fi
+
+    | USER_DATA
+
+ec2_instance { '[% name %]':
+  ensure                      => running,
+  region                      => '[% region %]',
+  availability_zone           => '[% availability_zone %]',
+  image_id                    => '[% image_id %]',
+  instance_type               => '[% instance_type %]',
+  associate_public_ip_address => [% associate_public_ip_address ? 'true' : 'false' %],
+  user_data                   => $user_data,
+  key_name                    => '[% key_name %]',
+  subnet                      => '[% subnet %]',
+  security_groups             => [[% FOREACH sg IN security_groups %]'[% sg %]',[% END %]],
+  tags                        => {[% FOREACH tag IN tags %]'[% tag.key %]' => '[% tag.value %]',[% END %] },
+}

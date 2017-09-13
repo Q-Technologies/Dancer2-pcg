@@ -1,0 +1,35 @@
+# This is the main configuration file of the Dancer2 app
+# Nothing should normally need to be modified in here
+
+appname: "PCG"
+layout: "main"
+charset: "UTF-8"
+session: "YAML"
+behind_proxy: 1
+
+template: "template_toolkit"
+engines:
+  template:
+    template_toolkit:
+      start_tag: '[%'
+      end_tag:   '%]'
+  session:
+    YAML:
+      session_dir: "/tmp/PCG-sessions"
+      session_expires: time() + 3600
+
+plugins:
+  Ajax:
+    content_type: 'application/json'
+
+records_db_file: records.sqlite
+
+# Initialise Database
+db_init: |
+  CREATE TABLE "instances" (
+    `instance_id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    `hostname`	TEXT NOT NULL,
+    `status`	TEXT NOT NULL,
+    `last_updated`	INTEGER NOT NULL DEFAULT 0
+  );
+

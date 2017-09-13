@@ -1,0 +1,53 @@
+# Are we sitting behind a proxy
+behind_proxy: 1
+
+# Credentials
+user: "PCG"
+pass: "randomstring"
+
+# Application settings
+puppet_master: puppet.example.com
+installed_by_user: puppet
+app_sub_envs: 
+  - dev
+  - qat
+  - uat
+  - stg
+  - prd
+default_cloud:
+  name: aws
+  region: ap-southeast-2
+  instance_size: t2.micro
+  subnet: default-a
+  app_sub_env: dev
+  role: vanilla
+  os: centos_7
+
+# Configure the clouds we can use
+clouds:
+  aws:
+    location: aws
+    access_key_name: 'me@host'
+    regions:
+      ap-southeast-2: 
+        zones:
+          ap-southeast-2a:
+            subnets:
+              - default-a
+          ap-southeast-2b:
+            subnets:
+              - default-b
+        image_ids:
+          centos_6: ami-7a959b19
+          centos_7: ami-24959b47
+          ubuntu_1204: ami-4e101b2d
+          ubuntu_1404: ami-cec0d9ad
+          ubuntu_1604: ami-546d7437
+    sizes:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+
+
+

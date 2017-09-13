@@ -1,0 +1,18 @@
+# configuration file for production environment
+
+startup_info: 0
+log: "core"
+logger: "file"
+warnings: 0
+show_errors: 0
+auto_reload: 0
+no_server_tokens: 1
+
+engines:
+  logger:
+    File:
+      log_dir: "/var/log/PCG"
+
+# Custom variables
+top_level_dir: "/opt/PCG"
+debug_level: 0

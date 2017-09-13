@@ -1,0 +1,10 @@
+---
+app_name: base
+puppet_role: base
+domain: example.com
+network_zone: outer_dmz
+network_type: corporate
+associate_public_ip_address: true
+security_groups: ['default']
+tags:
+  purpose: testing
