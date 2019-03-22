@@ -7,21 +7,30 @@ $user_data = @("USER_DATA"/)
     hostname [% name %].[% domain %]
     domainname [% domain %]
     echo [% name %].[% domain %]> /etc/hostname
+    echo $(hostname -I) [% name %].[% domain %] [% name %] >> /etc/hosts
     echo "preserve_hostname: true" >> /etc/cloud/cloud.cfg
-
-    curl https://bitbucket.org 2> /dev/null > /dev/null
-    if [[ $? -eq 0 ]]; then
-        curl https://bitbucket.org/target-ondemand/tonline-puppet-utils/raw/master/agent_install.sh > /tmp/install.sh
-    else
-        curl http://tlubitbckt01vth:7990/projects/PUP/repos/utils/browse/agent_install.sh?raw > /tmp/install.sh
+    if [[ $(grep -cEi "debian" /etc/os-release) -gt 0 ]]; then
+        echo "apt_preserve_sources_list: true" >> /etc/cloud/cloud.cfg
     fi
 
+    echo Testing for Internet access
+    curl https://centos.org 2> /dev/null > /dev/null
+    if [[ $? -ne 0 ]]; then
+        # Remove default repositories if we do not have internet access
+        echo Removing Default Repositories
+        if [[ $(grep -cEi "CentOS|Red\s*Hat|Oracle\s*Linux" /etc/os-release) -gt 0 ]]; then
+            rm -fr /etc/yum.repos.d/*.repo
+        fi
+    fi
+
+    echo Downloading the puppet agent install script
+    curl --connect-timeout 5 [% agent_script_uri %] > /tmp/install.sh
     if [[ -r /tmp/install.sh ]]; then
       chmod 755 /tmp/install.sh
       PCG_PP_MASTER="[% puppet_master %]"
       PCG_USER="[% user %]"
       PCG_PROVISIONER="[% provisioner %]"
-      /tmp/install.sh '[% app_name %]' '[% network_zone %]' '[% network_type %]' '[% location %]' '[% app_sub_env %]' '[% puppet_role %]' '[% puppet_env %]' [% app_sub_env_inst %]
+      /tmp/install.sh '[% app_name %]' '[% network_zone %]' '[% network_type %]' '[% location %]' '[% app_sub_env %]' '[% stack %]' '[% puppet_role %]' '[% puppet_env %]'
       /usr/local/bin/puppet agent -t
     else
         echo "There was an error downloading the Puppet install script"
@@ -42,4 +51,27 @@ ec2_instance { '[% name %]':
   subnet                      => '[% subnet %]',
   security_groups             => [[% FOREACH sg IN security_groups %]'[% sg %]',[% END %]],
   tags                        => {[% FOREACH tag IN tags %]'[% tag.key %]' => '[% tag.value %]',[% END %] },
+  block_devices               => [
+                                  {
+                                  [%- device = '/dev/sda1' %]
+                                    name                  => '[% name _ ' - ' _ device %]',
+                                    device_name           => '[% device %]',
+                                    volume_size           => [% root_volume_size ? root_volume_size : 12 %],
+                                    delete_on_termination => 'true',
+                                    volume_type           => 'standard',
+                                  },
+                                  [%- i = 1 %]
+                                  [%- letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'] %]
+                                  [%- FOREACH vol IN extra_volumes %]
+                                  [%- device = vol.device_name ? vol.device_name : 'xvd' _ letters.$i %]
+                                  {
+                                    name                  => '[% name _ ' - ' _ device %]',
+                                    device_name           => '[% device %]',
+                                    volume_size           => [% vol.volume_size ? vol.volume_size : 10 %],
+                                    delete_on_termination => [% vol.delete_on_termination == '' or vol.delete_on_termination == 'true' ? 'true' : 'false' %],
+                                    volume_type           => '[% vol.volume_type ? vol.volume_type : 'standard' %]',
+                                  },
+                                  [%- i = i + 1 %]
+                                  [%- END %]
+                                ],
 }

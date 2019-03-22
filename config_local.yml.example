@@ -8,12 +8,30 @@ pass: "randomstring"
 # Application settings
 puppet_master: puppet.example.com
 installed_by_user: puppet
+hostname_naming:
+  standard: 'e(w|l)(c|d|e|f|i|n|p|q|r|s|t|u|v)[a-z]{3,5}\d{1,2}(v|p)(cl|dc)'
+  company: example
+  platform: linux
+  hosting: vcl
+agent_script_uri: 'http://repo.example.com/repo/files/agent_install.sh'
+installed_by_user: puppet
 app_sub_envs: 
-  - dev
-  - qat
-  - uat
-  - stg
-  - prd
+  config: c
+  development: d
+  education: e
+  training: e
+  failandfix: f
+  integration: i
+  staging: i
+  nonprod: n
+  production: p
+  qat: q
+  regression: r
+  sandbox: s
+  testing: t
+  uat: u
+  volume: v
+  performance: v
 default_cloud:
   name: aws
   region: ap-southeast-2
