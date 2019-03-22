@@ -3,7 +3,7 @@
 This web service provides an API to drive cloud automation through the Puppet absraction layer.  Although all clouds require different parameters, using a 
 basically common interface reduces the amount of code to be maintained.  Puppet provides this abstraction layer, but does not provide a ready way to interact with it through an API.  This tool provides that gateway.
 
-**PCG** is written in Perl using the [Dancer2](http://perldancer.org) Web Framework (a lightweight framework based on Sinatra for Ruby).  **PCG** does not provide a web browser interface, but JSON can be sent and received as XMLHttpRequest object.  See https://github.com/Q-Technologies/PCG for full details.
+**PCG** is written in Perl using the [Dancer2](http://perldancer.org) Web Framework (a lightweight framework based on Sinatra for Ruby).  **PCG** does not provide a web browser interface, but JSON can be sent and received as XMLHttpRequest object.  See https://github.com/Q-Technologies/Dancer2-pcg for full details.
 
 ## Usage
 
